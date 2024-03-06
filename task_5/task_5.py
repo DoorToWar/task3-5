@@ -1,5 +1,6 @@
 import cv2
 import os
+import numpy as np
 
 
 def show_image(image, text, ms):
@@ -17,6 +18,37 @@ def show_image(image, text, ms):
     cv2.destroyWindow(text)  # закрывает окно
 
 
+def contours_filled(filtered_contours, original_image):
+    """_summary_
+
+    Parametrs:
+        filtered_contours (list): массив с отфильтрованными контурами
+        original_image (MatLike): изначальное изображение
+    """
+
+    image_for_contour = original_image.copy()
+    for i in range(len(filtered_contours)):
+        cv2.drawContours(image_for_contour,
+                         filtered_contours, i, (255, 0, 0), 1)
+        cv2.fillPoly(image_for_contour, filtered_contours, color=(255, 0, 0))
+    return (image_for_contour)
+
+
+def contours_rect(original_image, filtered_contours):
+    """_summary_
+
+    Parametrs:
+        image_rect (MatLike): _description_
+        filtered_contours (list): _description_
+    """
+    image_for_rectangle = original_image.copy()
+
+    for cnt in filtered_contours:
+        x, y, w, h = cv2.boundingRect(cnt)
+        cv2.rectangle(image_for_rectangle, (x, y), (x+w, y+h), (0, 255, 0), 2)
+    return image_for_rectangle
+
+
 def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     # Прикрепление пути до файла
@@ -24,6 +56,56 @@ def main():
     original_image = cv2.resize(cv2.imread(
         file_path, cv2.IMREAD_COLOR), (1920, 1080))
     show_image(original_image, "raw", 0)
+
+    hsv = cv2.cvtColor(original_image, cv2.COLOR_BGR2HSV)
+    show_image(hsv, "hsv", 0)
+
+    # т.к. все выделяют контур фильтры не подходят к данной задаче
+
+    # разделим на каналы
+
+    # Разделение на каналы и вывод
+    h, s, v = cv2.split(hsv)
+    show_image(h, "h", 0)
+    show_image(s, "s", 0)
+    show_image(v, "v", 0)
+
+    # Самый информативный (по визуальной оценке) - v
+
+    # перебором подобрал, что 150 - лучшее значение для выеделения золотой подложки
+    # порог для светлых пикселей
+
+    threshold = 150
+
+    #  маска для светлых пикселей
+    mask = cv2.inRange(v, threshold, 255)
+
+    # применил маску к изображению
+    bright_parts = cv2.bitwise_and(hsv, hsv, mask=mask)
+
+    show_image(bright_parts, "v", 0)
+
+    # Найдите контуры на маске
+    contours, _ = cv2.findContours(
+        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # перебор контуров
+    for contour in contours:
+        # просмотр площадей
+        print(cv2.contourArea(contour))
+
+    # Если фильтровать, то не вся подложка будет выделяться
+    filtered_contours = [
+        cnt for cnt in contours if cv2.contourArea(cnt) >= 5]
+
+    # контуры
+    image_for_contour = contours_filled(filtered_contours, original_image)
+
+    image_for_rectangle = contours_rect(original_image, filtered_contours)
+
+    show_image(image_for_rectangle, "fiiled contour",  0)
+
+    show_image(image_for_contour, "rect contour", 0)
 
 
 if __name__ == "__main__":
