@@ -131,23 +131,25 @@ def main():
     biletteral_filter = cv2.bilateralFilter(original_image, 9, 75, 75)
     show_image(biletteral_filter, "biletteral filter", 0)
 
+    gray_image = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+
     # Фильтр Canny
-    сanny = cv2.Canny(original_image, 50, 150)
+    сanny = cv2.Canny(gray_image, 50, 150)
     show_image(сanny, "canny", 0)
 
     # Фильтр Laplacian
-    laplacian = cv2.Laplacian(original_image, cv2.CV_64F)
+    laplacian = cv2.Laplacian(gray_image, cv2.CV_64F)
     show_image(laplacian, "laplacian", 0)
 
     # Фильтр Sobel
-    sobelx = cv2.Sobel(original_image, cv2.CV_64F, 1, 0, ksize=5)
-    sobely = cv2.Sobel(original_image, cv2.CV_64F, 0, 1, ksize=5)
+    sobelx = cv2.Sobel(gray_image, cv2.CV_64F, 1, 0, ksize=5)
+    sobely = cv2.Sobel(gray_image, cv2.CV_64F, 0, 1, ksize=5)
     combined_sobel = cv2.addWeighted(sobelx, 0.5, sobely, 0.5, 0)
     show_image(combined_sobel, "sobel", 0)
 
     # Фильтр Scharr
-    scharrx = cv2.Scharr(original_image, cv2.CV_64F, 1, 0)
-    scharry = cv2.Scharr(original_image, cv2.CV_64F, 0, 1)
+    scharrx = cv2.Scharr(gray_image, cv2.CV_64F, 1, 0)
+    scharry = cv2.Scharr(gray_image, cv2.CV_64F, 0, 1)
     combined_scharr = cv2.addWeighted(scharrx, 0.5, scharry, 0.5, 0)
     show_image(combined_scharr, "combined_scharr", 0)
 

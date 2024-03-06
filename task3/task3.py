@@ -27,7 +27,8 @@ def print_info(image):
     print("Изображение ", image)
     # вывод элементов shape (хранит высоту, ширину и кол-во каналов)
     print("Разрешение: ", image.shape[1], "x", image.shape[0])
-    print("Количество каналов: ", len(image.shape))
+    print("Количество каналов: ",
+          image.shape[-1] if image.ndim == 3 else 1)
 
 
 def rotate(image, degree):
