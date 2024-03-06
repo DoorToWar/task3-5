@@ -19,7 +19,8 @@ def show_image(image, text, ms):
 
 
 def contours_filled(filtered_contours, original_image):
-    """_summary_
+    """
+    Обводит и заполняет контуры изображения
 
     Parametrs:
         filtered_contours (list): массив с отфильтрованными контурами
@@ -35,7 +36,8 @@ def contours_filled(filtered_contours, original_image):
 
 
 def contours_rect(original_image, filtered_contours):
-    """_summary_
+    """
+    Отрисовывает ограничивающий прямоугольник для каждого контура 
 
     Parametrs:
         image_rect (MatLike): _description_
