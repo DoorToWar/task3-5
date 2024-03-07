@@ -5,11 +5,16 @@ import numpy as np
 
 def show_image(image, text, ms):
     """
+
     Выводит изображение.
-    Использует библиотеку cv2 .
-    Parametrs:
-        image (ndarray): Массив с набором данных - представление каждого пикселя в формате чисел
-        text (str): Название окна
+    Использует библиотеку cv2.
+
+    Parametrs
+    ---------
+        image : numpy.ndarray
+            Массив с набором данных - представление каждого пикселя в формате чисел
+        text : str
+            Название окна
     """
     cv2.imshow(text, image)  # выводит изображение
     cv2.waitKey(ms)  # ждет ввода пользователя
@@ -20,18 +25,27 @@ def show_image(image, text, ms):
 
 def contours_filled(filtered_contours, original_image):
     """
+
     Обводит и заполняет контуры изображения
 
-    Parametrs:
-        filtered_contours (list): массив с отфильтрованными контурами
-        original_image (MatLike): изначальное изображение
+    Parametrs
+    ---------
+    filtered_contours : list 
+        Массив с отфильтрованными контурами
+
+    original_image : numpy.ndarray
+        Изначальное изображение
+    Returns
+    -------
+    numpy.ndarray
+        Изображение
     """
 
     image_for_contour = original_image.copy()
     for i in range(len(filtered_contours)):
-        cv2.drawContours(image_for_contour,
-                         filtered_contours, i, (255, 0, 0), 1)
         cv2.fillPoly(image_for_contour, filtered_contours, color=(255, 0, 0))
+        cv2.drawContours(image_for_contour,
+                         filtered_contours, -1, (255, 0, 0), 1)
     return (image_for_contour)
 
 
@@ -39,9 +53,16 @@ def contours_rect(original_image, filtered_contours):
     """
     Отрисовывает ограничивающий прямоугольник для каждого контура 
 
-    Parametrs:
-        image_rect (MatLike): _description_
-        filtered_contours (list): _description_
+    Parametrs
+    ---------
+        image_rect : numpy.ndarray 
+            Изначальное изображение
+        filtered_contours : list
+            Массив с размерами контуров
+    Returns
+    -------
+        numpy.ndarray
+            Изображение
     """
     image_for_rectangle = original_image.copy()
 
@@ -55,11 +76,16 @@ def main():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     # Прикрепление пути до файла
     file_path = os.path.join(script_dir, 'pcb.jpg')
-    original_image = cv2.resize(cv2.imread(
-        file_path, cv2.IMREAD_COLOR), (1920, 1080))
-    show_image(original_image, "raw", 0)
 
-    hsv = cv2.cvtColor(original_image, cv2.COLOR_BGR2HSV)
+    original_image = cv2.imread(
+        file_path, cv2.IMREAD_COLOR)
+
+    if original_image is None:
+        os.exit()
+    image_resized = cv2.resize(original_image, (1920, 1080))
+    show_image(image_resized, "raw", 0)
+
+    hsv = cv2.cvtColor(image_resized, cv2.COLOR_BGR2HSV)
     show_image(hsv, "hsv", 0)
 
     # т.к. все выделяют контур фильтры не подходят к данной задаче
@@ -101,9 +127,9 @@ def main():
         cnt for cnt in contours if cv2.contourArea(cnt) >= 5]
 
     # контуры
-    image_for_contour = contours_filled(filtered_contours, original_image)
+    image_for_contour = contours_filled(filtered_contours, image_resized)
 
-    image_for_rectangle = contours_rect(original_image, filtered_contours)
+    image_for_rectangle = contours_rect(image_resized, filtered_contours)
 
     show_image(image_for_rectangle, "fiiled contour",  0)
 
